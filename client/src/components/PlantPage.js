@@ -4,9 +4,11 @@ import { AccountContext } from "./Account";
 import Axios from "axios";
 import Nav from "./Nav";
 import Note from "./Note";
+import { useSelector } from "react-redux";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { createFilterOptions } from "@mui/material/Autocomplete";
 import {
   Card,
@@ -25,10 +27,12 @@ import {
 
 import Footer from "./Footer";
 import { BASE_URL } from "../constants";
+import UploadImage from "./UploadImage";
 
 const filter = createFilterOptions();
 
 const PlantPage = () => {
+  const PATH = useSelector((state) => state.user.value.imagePath);
   //Show the input fields when the user selects the edit button
   const [editing, setEditing] = useState(false);
 
@@ -42,6 +46,7 @@ const PlantPage = () => {
   //Set state to the specific plant loaded
   const [plant, setPlant] = useState({});
   const [openEdit, setOpenEdit] = useState(false);
+  const [imagePath, setImage] = useState("");
   const handleOpenEdit = () => setOpenEdit(true);
   const handleCloseEdit = () => setOpenEdit(false);
 
@@ -78,6 +83,7 @@ const PlantPage = () => {
       setPlantName(response.data.name);
       setNoteList(response.data.notes);
       setValueLocation(response.data.location);
+      setImage(response.data.image);
     });
   }, []);
 
@@ -136,6 +142,24 @@ const PlantPage = () => {
         ...noteList.slice(idx + 1, noteList.length),
       ]);
     }
+  };
+
+  const editImage = (PATH) => {
+    //const id = plantId;
+    Axios.post(
+      BASE_URL + "/user/editImage",
+      { id: plant._id, imagePath: PATH },
+      {
+        params: {
+          username: username,
+          id: plant._id,
+        },
+      }
+    ).then((response) => {
+      setImage(PATH);
+      //dispatch(setImagePath(""));
+      setOpenEdit(false);
+    });
   };
 
   //style for modal
@@ -207,8 +231,8 @@ const PlantPage = () => {
             <CardMedia
               component="img"
               image={
-                plant.image !== "test"
-                  ? plant.image
+                imagePath !== "test" && imagePath !== ""
+                  ? imagePath
                   : "https://dummyimage.com/345x345/696969/696969"
               }
               alt={plant.image}
@@ -314,9 +338,14 @@ const PlantPage = () => {
                       {plantName}
                     </Typography>
                     {!editing && (
-                      <IconButton onClick={() => setEditing(true)}>
-                        <EditIcon />
-                      </IconButton>
+                      <div>
+                        <IconButton onClick={() => setEditing(true)}>
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton color="success" onClick={handleOpenEdit}>
+                          <AddPhotoAlternateIcon />
+                        </IconButton>
+                      </div>
                     )}
                   </Box>
                   <Typography
@@ -441,12 +470,38 @@ const PlantPage = () => {
               setNoteBodyValue(newValue.target.value);
             }}
           />
-          <Button
-            onClick={() => saveNote(titleValue, noteBodyValue)}
-            value={"test"}
-          >
+          <Button onClick={() => saveNote(titleValue, noteBodyValue)}>
             Save
           </Button>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={openEdit}
+        onClose={handleCloseEdit}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Stack
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+            textAlign="center"
+            gap={3}
+          >
+            <UploadImage />
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              {plantName}
+            </Typography>
+
+            <Button onClick={() => editImage(PATH)}>
+              <Typography color="green">Save</Typography>
+            </Button>
+            <Button onClick={() => handleCloseEdit(false)}>
+              <Typography color="red">Cancel</Typography>
+            </Button>
+          </Stack>
         </Box>
       </Modal>
     </>

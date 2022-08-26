@@ -8,6 +8,7 @@ import {
   CardMedia,
   Modal,
   CardActionArea,
+  Stack,
 } from "@mui/material";
 import OpacityIcon from "@mui/icons-material/Opacity";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -19,10 +20,11 @@ import Axios from "axios";
 import plantInfo from "../assets/plantInfo.json";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import UploadImage from "../components/UploadImage";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "../constants";
 import { BASE_URL } from "../constants";
+import { setImagePath } from "../redux/UserSlice";
 
 const filter = createFilterOptions();
 const PlantCard = ({
@@ -59,6 +61,7 @@ const PlantCard = ({
   const handleOpenEdit = () => setOpenEdit(true);
   const handleCloseEdit = () => setOpenEdit(false);
   let navigate = useNavigate();
+  const dispatch = useDispatch();
 
   //Set the name and image path from the props
   useEffect(() => {
@@ -106,41 +109,24 @@ const PlantCard = ({
     });
   };
 
-  const editLocation = (plantId, location) => {
-    const id = plantId;
-    Axios.post(
-      BASE_URL + "/user/editLocation",
-      { id: id, location: location },
-      {
-        params: {
-          username: userName,
-          id: plantId,
-        },
-      }
-    ).then((response) => {
-      setValueLocation(location);
-      handleCloseEdit(false);
-      setEditing(false);
-    });
-  };
-
-  //Upload a new image for the plant
-  const editImage = (plantId, PATH) => {
-    const id = plantId;
-    Axios.post(
-      BASE_URL + "/user/editImage",
-      { id: id, imagePath: PATH },
-      {
-        params: {
-          username: userName,
-          id: plantId,
-        },
-      }
-    ).then((response) => {
-      setImagePath(PATH);
-      setOpenEdit(false);
-    });
-  };
+  // //Upload a new image for the plant
+  // const editImage = (plantId, PATH) => {
+  //   const id = plantId;
+  //   Axios.post(
+  //     BASE_URL + "/user/editImage",
+  //     { id: id, imagePath: PATH },
+  //     {
+  //       params: {
+  //         username: userName,
+  //         id: plantId,
+  //       },
+  //     }
+  //   ).then((response) => {
+  //     setImagePath(PATH);
+  //     //dispatch(setImagePath(""));
+  //     setOpenEdit(false);
+  //   });
+  // };
 
   const deletePlant = () => {
     Axios.post(
@@ -188,38 +174,6 @@ const PlantCard = ({
     p: 4,
   };
 
-  //Test data for the input boxes
-  const plantData = [
-    { name: "AFRICAN VIOLET PLANT" },
-    { name: "AGAVE PLANT" },
-    { name: "ALOCASIA" },
-    { name: "ALOCASIA – JEWEL ALOCASIA" },
-    { name: "ALOE VERA PLANT" },
-    { name: "AMARYLLIS" },
-    { name: "ANGEL WING BEGONIA" },
-    { name: "ANTHURIUM" },
-    { name: "ARALIA PLANT" },
-    { name: "ARALIA PLANT – BALFOUR" },
-    { name: "ARECA PALM" },
-    { name: "ARROWHEAD PLANT" },
-    { name: "ASPARAGUS FERN" },
-    { name: "AZALEA" },
-    { name: "BABY’S TEARS PLANT" },
-    { name: "BAMBOO PALM" },
-    { name: "BEGONIA PLANT" },
-    { name: "TERRARIUM" },
-    { name: "WANDERING JEW PLANT" },
-    { name: "YUCCA PLANT" },
-    { name: "ZAMIOCULCAS ZAMIIFOLIA - ZZ PLANT" },
-    { name: "ZEBRA PLANT" },
-  ];
-
-  const options = [
-    { location: "bedroom" },
-    { location: "kitchen" },
-    { location: "living room" },
-  ];
-
   return (
     <div>
       <Card
@@ -254,7 +208,11 @@ const PlantCard = ({
             alt="user plant"
             height="280"
             sx={{ marginRight: 5, width: "inherit", boxShadow: 2 }}
-            image={imagePath}
+            image={
+              imagePath
+                ? imagePath
+                : "https://dummyimage.com/345x345/696969/696969"
+            }
           />
 
           <CardContent>
@@ -277,26 +235,27 @@ const PlantCard = ({
           </IconButton>
           {imageButton && (
             <>
-              <IconButton
+              {/* <IconButton
                 onClick={handleOpenEdit}
                 color="success"
                 aria-label="uplaod new image"
               >
                 <AddPhotoAlternateIcon />
-              </IconButton>
+              </IconButton> */}
 
               <IconButton
                 value={plantName}
                 onClick={() => lightInfo(plantName)}
-                color="primary"
+                sx={{ color: "palette.error.main" }}
+                color="error"
               >
-                <DeleteIcon />
+                <DeleteIcon color="white" />
               </IconButton>
             </>
           )}
         </CardActions>
       </Card>
-
+      {/* 
       <Modal
         open={openEdit}
         onClose={handleCloseEdit}
@@ -304,18 +263,27 @@ const PlantCard = ({
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {plantName}
-          </Typography>
-          <UploadImage onChange={() => setImagePath(PATH)} buttonType="text" />
-          <Button onClick={() => editImage(id, PATH)}>
-            <Typography color="green">Save</Typography>
-          </Button>
-          <Button onClick={() => handleCloseEdit(false)}>
-            <Typography color="red">Cancel</Typography>
-          </Button>
+          <Stack
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+            textAlign="center"
+            gap={3}
+          >
+            <UploadImage />
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              {plantName}
+            </Typography>
+            
+            <Button onClick={() => editImage(id, PATH)}>
+              <Typography color="green">Save</Typography>
+            </Button>
+            <Button onClick={() => handleCloseEdit(false)}>
+              <Typography color="red">Cancel</Typography>
+            </Button> 
+          </Stack>
         </Box>
-      </Modal>
+      </Modal> */}
 
       <Modal
         open={open}

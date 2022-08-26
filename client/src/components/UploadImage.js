@@ -24,7 +24,7 @@ async function postImage({ image, description }) {
   return result.data;
 }
 
-const UploadImageToS3WithReactS3 = ({ buttonType }) => {
+const UploadImageToS3WithReactS3 = () => {
   const PATH = useSelector((state) => state.user.value);
   const [file, setFile] = useState();
   const [description, setDescription] = useState("");
@@ -34,11 +34,13 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
 
   //post image then set the path to user slice for retrieval
   const submit = async (event) => {
+    console.log("SUBMIT");
     const file = event.target.files[0];
     setFile(file);
     event.preventDefault();
     await postImage({ image: file, description }).then((response) => {
       let path = BASE_URL + response.imagePath;
+      console.log(path);
       setImagePath2(path);
       setImages([response.image, ...images]);
       dispatch(setImagePath(path));
@@ -66,7 +68,7 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
           multiple
           type="file"
         />
-        {buttonType === "icon" ? (
+        {/* {buttonType === "icon" ? (
           <IconButton
             variant="contained"
             component="span"
@@ -75,11 +77,11 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
           >
             <AddPhotoAlternateIcon />
           </IconButton>
-        ) : (
-          <Button sx={{ margin: 5 }} variant="contained" component="span">
-            Upload an image
-          </Button>
-        )}
+        ) : ( */}
+        <Button sx={{ margin: 5 }} variant="contained" component="span">
+          Upload an image
+        </Button>
+        {/* )} */}
       </label>
 
       {/* {images.map(image => (
@@ -91,9 +93,9 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
       {imagePath && (
         <Box
           sx={{
-            display: "flex",
-            width: 330,
-            height: 330,
+            display: "block",
+            width: "250px",
+            // width: { xs: 150, md: 250 },
             backgroundColor: "primary.dark",
           }}
         >

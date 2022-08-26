@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: [{ isLoggedIn: window.localStorage.getItem("userStatus") }],
   username: "",
-  imagePath: "test",
+  imagePath: "",
   status: "idle",
   error: null,
 };

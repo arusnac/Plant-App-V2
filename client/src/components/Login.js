@@ -23,6 +23,7 @@ import Nav from "./Nav";
 
 const Login = () => {
   const [redirect, setRedirect] = useState(false);
+  const [loginError, setLoginError] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -39,9 +40,11 @@ const Login = () => {
         console.log("Logged in!", data);
         dispatch(toggleStatus(true));
         setRedirect(true);
+        setLoginError(false);
       })
       .catch((err) => {
         console.error("Failed to login", err);
+        setLoginError(true);
       });
   };
 
@@ -51,6 +54,8 @@ const Login = () => {
     }
   };
 
+  const inputProps = { helperText: "error" };
+
   return (
     <>
       {redirectTo()}
@@ -59,8 +64,10 @@ const Login = () => {
           display: "block",
           margin: 0,
           height: "100vh",
-          backgroundImage:
-            "url(https://source.unsplash.com/RDE59yq9pRw/1920x1080)",
+          backgroundImage: {
+            md: "url(https://source.unsplash.com/RDE59yq9pRw/1920x1080)",
+            xs: "url(https://source.unsplash.com/Sg7eWHKrxrA/640x960)",
+          },
         }}
       >
         <Box
@@ -93,7 +100,7 @@ const Login = () => {
                 Keep a digital collection of your plants, add notes, and track
                 your watering.
               </Typography>
-              <Typography mb={2}>
+              <Typography mb={0}>
                 Sign in or register an account to start your collection.
               </Typography>
               <Button
@@ -140,6 +147,10 @@ const Login = () => {
                   <TextField
                     margin="normal"
                     required
+                    error={loginError}
+                    helperText={
+                      loginError ? "Incorrect username or passord" : ""
+                    }
                     fullWidth
                     name="password"
                     label="Password"

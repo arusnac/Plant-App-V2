@@ -7,6 +7,7 @@ router.get("/", (req, res) => {
   let param = req.query.username;
   UserModel.findOne({ userName: param }, (err, result) => {
     if (err) {
+      console.log(err);
       res.json(err);
     } else {
       res.json(result);
@@ -132,6 +133,7 @@ router.post("/editImage", async (req, res) => {
   const result = await UserModel.findOne({ userName: param }).then((doc) => {
     let plant = doc.plants.id(plantId);
     plant.image = imagePath;
+    console.log(plant.image);
     doc.save();
   });
   res.json(result);

@@ -1,15 +1,14 @@
 .plantContainer {
-    margin: 20px 0 20px 0;
-    display: flex;
-    justify-content: center;
-    gap: 10px 20px;
-    flex-wrap: wrap;
-    flex-direction: row-reverse;
+  margin: 20px 0 20px 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px 20px;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 
 .editButtons {
-    display: flex; 
-    flex-direction: row;
-    justify-content: flex-end;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
 }
-
