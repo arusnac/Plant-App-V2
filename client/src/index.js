@@ -13,6 +13,11 @@ import PlantPage from "./components/PlantPage";
 import About from "./components/About";
 import UserAccount from "./components/UserAccount";
 import PrivateRoute from "./PrivateRoute/index";
+import UserHome from "./components/UserHome";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -45,6 +50,14 @@ root.render(
               element={
                 <PrivateRoute>
                   <UserAccount />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/home"
+              element={
+                <PrivateRoute>
+                  <UserHome />
                 </PrivateRoute>
               }
             />

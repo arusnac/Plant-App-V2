@@ -332,6 +332,7 @@ const App = () => {
             {plantList.map((plants) => {
               return (
                 <PlantCard
+                  size={[275, 275, 280]}
                   open={confirmationWindow}
                   deletePlantCard={deletePlantCard}
                   key={plants._id}

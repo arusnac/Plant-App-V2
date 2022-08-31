@@ -28,6 +28,7 @@ import { setImagePath } from "../redux/UserSlice";
 
 const filter = createFilterOptions();
 const PlantCard = ({
+  size,
   userName,
   name,
   image,
@@ -45,6 +46,7 @@ const PlantCard = ({
   const [waterDate, setWaterDate] = useState(watered);
   const [imagePath, setImagePath] = useState(image);
   const [valueLocation, setValueLocation] = useState(null);
+  const [width, height, imageHeight] = size;
 
   //Toggles the light info modal
   const [open, setOpen] = useState(false);
@@ -69,6 +71,7 @@ const PlantCard = ({
     setImagePath(image);
     setValueLocation(location);
     setCurrentId(id);
+    // console.log(width, height, imageHeight);
   }, []);
 
   //Update the watering date to today
@@ -181,8 +184,8 @@ const PlantCard = ({
         onMouseOver={() => showImageButton(true)}
         variant="outlined"
         sx={{
-          minWidth: 275,
-          maxWidth: 275,
+          minWidth: width,
+          maxWidth: width,
           "&:hover": {},
           display: "flex",
           flexDirection: "column",
@@ -206,7 +209,7 @@ const PlantCard = ({
             onClick={() => navigate(`/plantpage/${id}`)}
             component="img"
             alt="user plant"
-            height="280"
+            height={imageHeight}
             sx={{ marginRight: 5, width: "inherit", boxShadow: 2 }}
             image={
               imagePath
@@ -216,10 +219,12 @@ const PlantCard = ({
           />
 
           <CardContent>
-            <Typography>
-              Location: {valueLocation}
-              <br />
-            </Typography>
+            {location && (
+              <Typography>
+                Location: {valueLocation}
+                <br />
+              </Typography>
+            )}
             <Typography>Last watered: {waterDate}</Typography>
             {/* <IconButton variant="contained" color="primary"><OpacityIcon /></IconButton> */}
           </CardContent>

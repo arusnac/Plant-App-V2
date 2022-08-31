@@ -50,7 +50,8 @@ const Login = () => {
 
   const redirectTo = () => {
     if (redirect) {
-      return <Navigate to="/" />;
+      return navigate(`/home`);
+      //<Navigate to="/home" />;
     }
   };
 
