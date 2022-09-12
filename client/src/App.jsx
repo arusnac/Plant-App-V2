@@ -69,27 +69,17 @@ const App = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [severity, setSeverity] = useState("");
 
-  const [currentUser, setCurrentUser] = useState("");
   const { getUser } = useContext(AccountContext);
-
   const user = getUser();
+
+  const dispatch = useDispatch();
+
   //Get the image path from UploadImage
   const PATH = useSelector((state) => state.user.value);
-  const userStatus = useSelector(
-    (state) => state.user.value.user[0].isLoggedIn
-  );
-  const dispatch = useDispatch();
 
   //If the user is logged in get their plant collection on initial loading
   useEffect(() => {
-    //Get the userstate from local storage
-    dispatch(toggleStatus(window.localStorage.getItem("userStatus")));
-
-    let userName;
     if (user) {
-      userName = user.username;
-      dispatch(setUsername(userName));
-      setCurrentUser(userName);
       //If the url contains optional parameters (ie "kitchen", "bedroom") get the appropriate plants from MongoDB
       //Else get all the users plants
       if (params.option) {
@@ -104,12 +94,11 @@ const App = () => {
         });
       } else
         Axios.get(BASE_URL + "/user", {
-          params: { username: userName },
+          params: { username: user.username },
         }).then((response) => {
           setPlantList(response.data.plants);
         });
     } else {
-      userName = "";
       console.log("Error: can't find user");
     }
   }, []);
@@ -118,12 +107,13 @@ const App = () => {
   const deletePlantCard = (e) => {
     Axios.post(BASE_URL + "/user/delete", {
       id: e.target.value,
-      username: currentUser,
+      username: user.username,
       toDelete: "plant",
     }).then((response) => {
       handleClick("Plant removed!", "warning");
     });
     //Find index of selected plant to delete
+    console.log(plantList.map((x) => x._id));
     const index = plantList.map((x) => x._id).indexOf(e.target.value);
     if (index !== -1) {
       setPlantList([
@@ -133,11 +123,6 @@ const App = () => {
       setConfirmationWindow(false);
     }
   };
-
-  //Save the userstatus to local storage to maintain the app on refresh
-  useEffect(() => {
-    window.localStorage.setItem("userStatus", userStatus);
-  }, [userStatus]);
 
   //Toggles the light info modal
   const [open, setOpen] = useState(false);
