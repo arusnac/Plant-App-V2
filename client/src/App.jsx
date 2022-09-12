@@ -30,6 +30,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { BASE_URL } from "./constants";
+import { useParams } from "react-router-dom";
 
 const App = () => {
   const [plantList, setPlantList] = useState([]);
@@ -38,7 +39,9 @@ const App = () => {
   const [waterDate, setWaterDate] = useState("");
   const [valueDate, setValueDate] = useState("");
 
-  //Functionality to sort plant list
+  let params = useParams();
+
+  //Functionallity to handle the sort menu
   const [anchorEl, setAnchorEl] = useState(null);
   const openSort = Boolean(anchorEl);
   const handleSortClick = (event) => {
@@ -48,18 +51,18 @@ const App = () => {
     setAnchorEl(null);
   };
 
+  //Sort the plants alphabetically or by earliest watering date
   const handleSort = (sortBy) => {
     if (sortBy === "name")
       plantList.sort((a, b) => a.name.localeCompare(b.name));
     else if (sortBy === "watering")
       plantList.sort((a, b) => a.watered[0].localeCompare(b.watered[0]));
     setPlantList(plantList);
-    console.log(plantList);
     handleSortClose();
   };
 
   //Pass the state of the delete confirmation window to the plant card in order to close it
-  //After deletion
+  //after deletion
   const [confirmationWindow, setConfirmationWindow] = useState(false);
 
   //Alert for when plants are added or deleted, plus the style of the message
@@ -69,8 +72,8 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState("");
   const { getUser } = useContext(AccountContext);
 
-  const URL = "http://localhost:5000/user/";
   const user = getUser();
+  //Get the image path from UploadImage
   const PATH = useSelector((state) => state.user.value);
   const userStatus = useSelector(
     (state) => state.user.value.user[0].isLoggedIn
@@ -79,25 +82,39 @@ const App = () => {
 
   //If the user is logged in get their plant collection on initial loading
   useEffect(() => {
-    const today = new Date();
-    //get the userstate from local storage
+    //Get the userstate from local storage
     dispatch(toggleStatus(window.localStorage.getItem("userStatus")));
-    let userName = "";
+
+    let userName;
     if (user) {
       userName = user.username;
       dispatch(setUsername(userName));
       setCurrentUser(userName);
-      Axios.get(BASE_URL + "/user", {
-        params: { username: userName },
-      }).then((response) => {
-        setPlantList(response.data.plants);
-      });
+      //If the url contains optional parameters (ie "kitchen", "bedroom") get the appropriate plants from MongoDB
+      //Else get all the users plants
+      if (params.option) {
+        Axios.get(BASE_URL + "/user", {
+          params: {
+            username: user.username,
+            option: true,
+            attribute: params.option,
+          },
+        }).then((response) => {
+          setPlantList(response.data);
+        });
+      } else
+        Axios.get(BASE_URL + "/user", {
+          params: { username: userName },
+        }).then((response) => {
+          setPlantList(response.data.plants);
+        });
     } else {
       userName = "";
-      console.log("error");
+      console.log("Error: can't find user");
     }
   }, []);
 
+  //Remove plant after confirmation from the user
   const deletePlantCard = (e) => {
     Axios.post(BASE_URL + "/user/delete", {
       id: e.target.value,
@@ -106,6 +123,7 @@ const App = () => {
     }).then((response) => {
       handleClick("Plant removed!", "warning");
     });
+    //Find index of selected plant to delete
     const index = plantList.map((x) => x._id).indexOf(e.target.value);
     if (index !== -1) {
       setPlantList([
@@ -126,22 +144,8 @@ const App = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  //style for modal
-  const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
-
   //Handles the alert when plant is added
   const [openSnack, setOpenSnack] = useState(false);
-
   const handleClick = (message, sev) => {
     setAlertMessage(message);
     setSeverity(sev);
@@ -161,12 +165,21 @@ const App = () => {
     if (!name.length > 0 || !location.length > 0)
       return alert("Please fill all requried fields.");
     else {
-      let watered =
-        waterDate.length > 0 ? waterDate : new Date().toLocaleDateString();
+      //Set the watering date if the user manually inputs it
+      //Else get todays date and add it to the plant, append a 0 infront of the month
+      //to make the dates uniform
+      let watered;
+      if (waterDate.length > 0) watered = waterDate;
+      else {
+        let date = new Date().toLocaleDateString();
+        if (Number(date[0]) < 10) date = `0` + date;
+        watered = date;
+      }
+
       let imagePath = PATH.imagePath;
       Axios.post(
         BASE_URL + "/user/update",
-        { name, location, watered: watered, image: imagePath },
+        { name, location, watered, image: imagePath },
         {
           params: { username: user.username },
         }
@@ -177,6 +190,7 @@ const App = () => {
         ]);
         handleClose();
         //Clear the image path after the image has been sucessfully uploaded
+        //TODO: Check if related to bug with image upload not being consistent
         dispatch(setImagePath(""));
         handleClick("Plant Added!", "success");
       });
@@ -184,10 +198,27 @@ const App = () => {
   };
 
   //Convert the date from the date picker to match desired output
+  //TODO: Review for simpler method
   const formatDate = (date) => {
     setValueDate(date);
-    const [year, month, day] = date.split("-");
+    let [year, month, day] = date.split("-");
+    if (month.length === 1) {
+      month = `0` + month;
+    }
     setWaterDate(`${month}/${day}/${year}`);
+  };
+
+  //style for modal
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
   };
 
   return (
@@ -225,6 +256,7 @@ const App = () => {
           >
             Sort
           </Button>
+          <Button href="/plants">View All</Button>
           <Menu
             id="basic-menu"
             anchorEl={anchorEl}

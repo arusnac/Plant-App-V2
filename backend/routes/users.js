@@ -4,12 +4,22 @@ const router = express.Router();
 
 //return all the plants for this user
 router.get("/", (req, res) => {
-  let param = req.query.username;
+  const param = req.query.username;
+  //Optional parameter
+  let option = req.query.option ? req.query.attribute : "";
+
   UserModel.findOne({ userName: param }, (err, result) => {
-    if (err) {
-      console.log(err);
+    //Filter the results and return based on the optional parameter
+    if (option) {
+      const filtered = result.plants.filter(
+        (plant) => plant.location === option
+      );
+      res.json(filtered);
+    } else if (err) {
       res.json(err);
-    } else {
+    }
+    //Return all plants for the user
+    else {
       res.json(result);
     }
   });
@@ -19,7 +29,7 @@ router.get("/", (req, res) => {
 router.get("/plant", (req, res) => {
   let param = req.query.username;
   let plantId = req.query.id;
-  const result = UserModel.findOne({ userName: param }).then((doc) => {
+  UserModel.findOne({ userName: param }).then((doc) => {
     let plant = doc.plants.id(plantId);
     res.json(plant);
   });
@@ -30,7 +40,7 @@ router.get("/notes", (req, res) => {
   const plantId = req.body.id;
   const user = req.body.id;
 
-  const result = UserModel.findOne({ userName: param }).then((doc) => {
+  UserModel.findOne({ userName: param }).then((doc) => {
     let plant = doc.plants.id(plantId);
     res.json(plant.notes);
   });
@@ -47,7 +57,7 @@ router.post("/new", async (req, res) => {
 
 router.post("/update", async (req, res) => {
   let param = req.query.username;
-  const result = await UserModel.findOne({ userName: param }).then((doc) => {
+  await UserModel.findOne({ userName: param }).then((doc) => {
     doc.plants.push(req.body);
     doc.save();
     res.json(doc.plants.at(-1));

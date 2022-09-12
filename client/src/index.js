@@ -14,6 +14,7 @@ import About from "./components/About";
 import UserAccount from "./components/UserAccount";
 import PrivateRoute from "./PrivateRoute/index";
 import UserHome from "./components/UserHome";
+import PlantBySpace from "./pages/PlantBySpace";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -27,7 +28,15 @@ root.render(
         <Account>
           <Routes>
             <Route
-              path="/"
+              path="plants/:option"
+              element={
+                <PrivateRoute>
+                  <App />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/plants"
               element={
                 <PrivateRoute>
                   <App />
@@ -35,6 +44,7 @@ root.render(
               }
             />
             <Route path="login" element={<Login />} />
+            <Route path="space/:space" element={<PlantBySpace />} />
             <Route path="SignUp" element={<SignUp />} />
             <Route
               path="plantpage/:plantId"
@@ -54,7 +64,7 @@ root.render(
               }
             />
             <Route
-              path="/home"
+              path="/"
               element={
                 <PrivateRoute>
                   <UserHome />

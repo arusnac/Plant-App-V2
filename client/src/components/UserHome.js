@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Box, Button, Typography, styled, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  styled,
+  Paper,
+  getImageListItemBarUtilityClass,
+} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import Nav from "./Nav";
 import { ScrollMenu, VisibilityContext } from "react-horizontal-scrolling-menu";
@@ -8,6 +15,14 @@ import Axios from "axios";
 import { BASE_URL } from "../constants";
 import PlantCard from "./PlantCard";
 import { AccountContext } from "./Account";
+import "../util/hideScrollbar.css";
+import kitchen from "../assets/img/Kitchen.jpg";
+import bedroom from "../assets/img/Bedroom.jpg";
+import office from "../assets/img/Office.jpg";
+import livingRoom from "../assets/img/LivingRoom.jpg";
+import room from "../assets/img/Room.jpg";
+import entryWay from "../assets/img/Entryway.jpg";
+import { useNavigate } from "react-router-dom";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -24,18 +39,16 @@ const UserHome = () => {
   const { getUser } = useContext(AccountContext);
   const user = getUser();
   const username = user.username;
+  const navigate = useNavigate();
 
   useEffect(() => {
     let userName = "";
     if (user) {
       userName = user.username;
-      //dispatch(setUsername(userName));
-      //setCurrentUser(userName);
       Axios.get(BASE_URL + "/user", {
         params: { username: userName },
       }).then((response) => {
         setPlantList(response.data.plants);
-        //console.log(response.data.plants);
         getSpaces(response.data.plants);
       });
     } else {
@@ -51,16 +64,39 @@ const UserHome = () => {
     for (const plant of data) {
       if (plant["location"]) tempSet.add(plant["location"]);
       else continue;
-      if (plant["watered"] < today[0]) {
+      if (
+        Number(plant["watered"][0] + plant["watered"][1]) < Number(today[0])
+      ) {
         tempArr.push(plant);
-        console.log(plant["watered"]);
+        console.log(plant["watered"][0] + plant["watered"][1]);
       }
     }
-    //const today = new Date();
-    console.log(today);
+    console.log(tempSet);
     setSpacesArr([...tempSet]);
     setPlantsToWater([...tempArr]);
     console.log(plantsToWater);
+  };
+
+  const getImage = (space) => {
+    switch (space) {
+      case "Kitchen":
+        return kitchen;
+
+      case "Bedroom":
+        return bedroom;
+
+      case "Living Room":
+        return livingRoom;
+
+      case "Office":
+        return office;
+
+      case "Entryway":
+        return entryWay;
+
+      default:
+        return room;
+    }
   };
 
   return (
@@ -75,54 +111,57 @@ const UserHome = () => {
           flexDirection: "row",
           gap: 5,
           mt: 2,
+
           mb: 2,
         }}
       >
         <Grid sx={{ justifyContent: "center" }} container spacing={2}>
-          <Box
-            sx={{
-              width: "50%",
-            }}
-          >
-            <Grid xs={12}>
-              <Typography variant="h4">Welcome {username}</Typography>
-            </Grid>
-            <Grid xs={12}>
-              <Typography variant="h5">Your spaces</Typography>
-            </Grid>
-            <Grid xs={12}>
-              <ScrollMenu
-                style={{ overflowX: "hidden" }}
+          <Grid xs={12}>
+            <Box sx={{ backgroundColor: "#fff" }}>
+              <Grid xs={12}>
+                <Typography variant="h4">Welcome {username}</Typography>
+              </Grid>
+              <Grid
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  borderBottom: "solid 1px",
+                  justifyContent: "space-between",
+                }}
+                xs={12}
+              >
+                <Typography variant="h5">Your spaces</Typography>
+                {/* <Button>Add a New Space</Button> */}
+              </Grid>
+              <Grid
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                }}
+              >
+                {/* <ScrollMenu
+                style={{ overflowY: "hidden" }}
                 LeftArrow={LeftArrow}
                 RightArrow={RightArrow}
-              >
+              > */}
                 {spacesArr.map((space, index) => (
                   <Card
                     itemId={index} // NOTE: itemId is required for track items
                     title={space}
+                    image={getImage(space)}
                     key={index}
                   >
                     {space}
                   </Card>
                 ))}
-              </ScrollMenu>
-            </Grid>
-            <Grid xs={8} sx={{ marginTop: 5 }}>
-              <Typography variant="h5">Articles</Typography>
-              <Typography variant="h6">Title</Typography>
-              <Typography>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </Typography>
-            </Grid>
-          </Box>
-          <Grid sx={{ padding: 0, marginLeft: 2 }} xs={3}>
-            <Box sx={{}}>
+                {/* </ScrollMenu> */}
+              </Grid>
+              <Button onClick={() => navigate(`/plants`)}>
+                View All Plants
+              </Button>
+            </Box>
+            <Grid>
               <Typography mt variant="h5">
                 These plants might need water
               </Typography>
@@ -131,6 +170,7 @@ const UserHome = () => {
                   display: "flex",
                   flexDirection: "row",
                   flexWrap: "wrap",
+                  gap: 1,
                   marginTop: 3,
                 }}
               >
@@ -151,7 +191,7 @@ const UserHome = () => {
                   );
                 })}
               </Box>
-            </Box>
+            </Grid>
           </Grid>
         </Grid>
       </Box>
@@ -195,38 +235,48 @@ function RightArrow() {
   );
 }
 
-function Card({ onClick, selected, title, itemId }) {
+function Card({ onClick, selected, title, itemId, image }) {
   const visibility = React.useContext(VisibilityContext);
+
+  const navigate = useNavigate();
+
+  const navigateToSpace = (event) => {
+    navigate(`plants/${event.target.textContent}`);
+  };
 
   return (
     <div
-      onClick={() => onClick(visibility)}
+      onClick={(e) => navigateToSpace(e)}
       style={{
-        width: "260px",
+        cursor: "pointer",
+        width: "220px",
         margin: 10,
-        backgroundImage: `url("https://source.unsplash.com/random/200×200/?${title}")`,
+        textAlign: "center",
+        backgroundImage: `linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url(${image})`,
         backgroundSize: "cover",
+        borderRadius: "25% 10%",
+        boxShadow: "1px 1px 5px black",
       }}
       tabIndex={0}
     >
-      <div>
+      <div></div>
+      <div
+        style={{
+          display: "flex",
+          height: "220px",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Typography
           variant="h6"
           sx={{
-            background: "rgba(0, 0, 0, 0.1)",
             color: "white",
           }}
         >
           {title}
         </Typography>
-        {/* <div>visible: {JSON.stringify(!!visibility.isItemVisible(itemId))}</div>
-        <div>selected: {JSON.stringify(!!selected)}</div> */}
       </div>
-      <div
-        style={{
-          height: "260px",
-        }}
-      />
     </div>
   );
 }

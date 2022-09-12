@@ -71,12 +71,11 @@ const PlantCard = ({
     setImagePath(image);
     setValueLocation(location);
     setCurrentId(id);
-    // console.log(width, height, imageHeight);
   }, []);
 
   //Update the watering date to today
   const updateWatered = (plantId) => {
-    const watered = new Date().toLocaleDateString();
+    const watered = `0` + new Date().toLocaleDateString();
     const id = plantId;
     Axios.post(
       BASE_URL + "/user/water",
@@ -112,25 +111,7 @@ const PlantCard = ({
     });
   };
 
-  // //Upload a new image for the plant
-  // const editImage = (plantId, PATH) => {
-  //   const id = plantId;
-  //   Axios.post(
-  //     BASE_URL + "/user/editImage",
-  //     { id: id, imagePath: PATH },
-  //     {
-  //       params: {
-  //         username: userName,
-  //         id: plantId,
-  //       },
-  //     }
-  //   ).then((response) => {
-  //     setImagePath(PATH);
-  //     //dispatch(setImagePath(""));
-  //     setOpenEdit(false);
-  //   });
-  // };
-
+  //Remove plant from DB then close the modal
   const deletePlant = () => {
     Axios.post(
       BASE_URL + "/user/delete",
@@ -149,6 +130,7 @@ const PlantCard = ({
   const [light, setLight] = useState("");
 
   //If the plants light info exists, show in a modal
+  //Future feature
   const lightInfo = (name) => {
     const plantName = name.toUpperCase();
     setPlantName(plantName);
@@ -225,7 +207,12 @@ const PlantCard = ({
                 <br />
               </Typography>
             )}
-            <Typography>Last watered: {waterDate}</Typography>
+            {width === 150 ? (
+              <Typography>{waterDate}</Typography>
+            ) : (
+              <Typography>Last watered: {waterDate}</Typography>
+            )}
+
             {/* <IconButton variant="contained" color="primary"><OpacityIcon /></IconButton> */}
           </CardContent>
         </CardActionArea>
