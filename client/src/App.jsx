@@ -61,14 +61,6 @@ const App = () => {
     handleSortClose();
   };
 
-  //Pass the state of the delete confirmation window to the plant card in order to close it
-  //after deletion
-  const [confirmationWindow, setConfirmationWindow] = useState(false);
-
-  //Alert for when plants are added or deleted, plus the style of the message
-  const [alertMessage, setAlertMessage] = useState("");
-  const [severity, setSeverity] = useState("");
-
   const { getUser } = useContext(AccountContext);
   const user = getUser();
 
@@ -103,6 +95,10 @@ const App = () => {
     }
   }, []);
 
+  //Pass the state of the delete confirmation window to the plant card in order to close it
+  //after deletion
+  const [confirmationWindow, setConfirmationWindow] = useState(false);
+
   //Remove plant after confirmation from the user
   const deletePlantCard = (e) => {
     Axios.post(BASE_URL + "/user/delete", {
@@ -113,7 +109,6 @@ const App = () => {
       handleClick("Plant removed!", "warning");
     });
     //Find index of selected plant to delete
-    console.log(plantList.map((x) => x._id));
     const index = plantList.map((x) => x._id).indexOf(e.target.value);
     if (index !== -1) {
       setPlantList([
@@ -124,12 +119,11 @@ const App = () => {
     }
   };
 
-  //Toggles the light info modal
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   //Handles the alert when plant is added
+  //plus the style of the message
+  const [alertMessage, setAlertMessage] = useState("");
+  const [severity, setSeverity] = useState("");
+
   const [openSnack, setOpenSnack] = useState(false);
   const handleClick = (message, sev) => {
     setAlertMessage(message);
@@ -143,6 +137,11 @@ const App = () => {
     }
     setOpenSnack(false);
   };
+
+  //Toggles the add plant modal modal
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   //Add plant to the user collection in mongoDB then update the list to
   //rerender the the plant cards
