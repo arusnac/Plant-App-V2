@@ -13,8 +13,6 @@ More features for individual plants (notes)
 <Br/><Br/>
 React, Redux, React-Router and Material UI are used for the frontend.<Br/>
 Node, Express and MongoDB are used on the backend.
-<BR/><br/>
-Live site here: https://plantem.herokuapp.com/
 <BR/><BR/>
 Login
 ![login](https://dashboard-kitchen.s3.us-west-2.amazonaws.com/login.PNG)
